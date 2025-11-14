@@ -22,13 +22,13 @@ export class techlistic{
         // await this.navBarSelenium.click();
     }
 
-    async extractAndPrintItems(): Promise<String[]>{
+    async extractAndPrintItems(): Promise<string[]>{
         await expect(this.seleniumItemsList.first()).toBeVisible();
         const items = await this.seleniumItemsList.allInnerTexts();
         console.log("Dropdown items:", items);
         return items;
     }
-    async assertSeleniumItems(items): Promise<void>{
+    async assertSeleniumItems(items: string[]): Promise<void>{
         await expect(items.length).toBeGreaterThan(0);
             for(const expected of expectedSeleniumItems)
               expect(items).toContain(expected);

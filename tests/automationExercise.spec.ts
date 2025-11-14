@@ -1,18 +1,18 @@
 import { test, expect } from '@playwright/test';
-// import { techlistic} from '../pages/techlistic'
+import { automationExercisePage} from '../pages/automationExercisePage'
 // import { beforeEach } from 'node:test';
 
 test.describe('MariTime - AutomationExercise', () =>
   {
-//    let tl: techlistic; 
+   let autoEx: automationExercisePage; 
 
-//     test.beforeEach(async ({ page }) => {
-//     tl = new techlistic(page);    
-//     await page.goto('https://www.techlistic.com/');
-//   });
-//test
-  test('Extract all Items from Selenium dropdown list', async ({ page }) => {
-   
+    test.beforeEach(async ({ page }) => {
+    autoEx = new automationExercisePage(page);    
+    await page.goto('https://automationexercise.com/');
+  });
+
+  test('Add 3 product and checkout', async ({ page }) => {
+   await autoEx.clickCart();
     // await tl.VerifyVisibilityOfSelenium();
     // const items = await tl.extractAndPrintItems(); 
     // await tl.assertSeleniumItems(items);    
