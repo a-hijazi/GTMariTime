@@ -10,7 +10,7 @@ test.describe('MariTime - Techlistic', () =>
     tl = new techlistic(page);    
     await page.goto('https://www.techlistic.com/');
   });
-
+//test
   test('Extract all Items from Selenium dropdown list', async ({ page }) => {
    
     await tl.VerifyVisibilityOfSelenium();
