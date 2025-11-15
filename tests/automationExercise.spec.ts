@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { automationExercisePage } from "../pages/automationExercisePage";
+import {
+  requiredProducts,
+  URLs,
+  emptyMessage,
+} from "../constants/automationExercise";
 // import { beforeEach } from 'node:test';
 
 test.describe("MariTime - AutomationExercise", () => {
@@ -13,6 +18,7 @@ test.describe("MariTime - AutomationExercise", () => {
   test("Add 3 product and checkout", async ({ page }) => {
     await autoEx.clickCart();
     await autoEx.verifyTheCartIsEmpty();
+    await autoEx.addProductUsingEmptyPageOption(requiredProducts[0]);
     // await tl.VerifyVisibilityOfSelenium();
     // const items = await tl.extractAndPrintItems();
     // await tl.assertSeleniumItems(items);

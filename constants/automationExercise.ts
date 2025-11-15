@@ -3,6 +3,9 @@ export const requiredProducts = [
   "Soft Stretch Jeans",
   "Stylish Dress",
 ];
-
-export const viewCartURL = "https://automationexercise.com/view_cart";
 export const emptyMessage = "Cart is empty!";
+
+export const URLs = {
+  viewCartURL: "https://automationexercise.com/view_cart",
+  productPage: "https://automationexercise.com/products",
+};
