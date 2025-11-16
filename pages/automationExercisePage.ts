@@ -1,15 +1,12 @@
 import { Locator, Page, expect } from "@playwright/test";
-import {
-  requiredProducts,
-  URLs,
-  emptyMessage,
-} from "../constants/automationExercise";
+import { URLs, emptyMessage } from "../constants/automationExercise";
 
 export class automationExercisePage {
   private readonly Cart: Locator;
   private readonly Products: Locator;
   private readonly emptyCartMessage: Locator;
   private readonly hereLinkProduct: Locator;
+  private readonly checkOutButton: Locator;
   readonly productSearchBar: Locator;
   readonly productsearchButton: Locator;
   readonly continueShopping: Locator;
@@ -19,11 +16,10 @@ export class automationExercisePage {
     this.Products = page.getByRole("link", { name: "products" });
     this.emptyCartMessage = page.locator("#empty_cart p.text-center");
     this.hereLinkProduct = page.getByRole("link", { name: "here" });
-
+    this.checkOutButton = page.getByText("Proceed To Checkout");
     this.productSearchBar = page.getByRole("textbox", {
       name: "Search Product",
     });
-
     this.productsearchButton = page
       .getByRole("button")
       .filter({ has: page.locator(".fa-search") });
@@ -33,35 +29,21 @@ export class automationExercisePage {
     });
   }
 
-  //-----------------------------------------------------
-  // DYNAMIC LOCATORS
-  //-----------------------------------------------------
-
-  viewProductFor(productName: string) {
-    return this.page
-      .locator(".product-image-wrapper", { hasText: productName })
-      .getByRole("link", { name: "View Product" });
-  }
-
-  productCard(productName: string) {
+  private productCard(productName: string) {
     return this.page.locator(".product-image-wrapper", {
       hasText: productName,
     });
   }
 
-  productNameElement(productName: string) {
+  private productNameElement(productName: string) {
     return this.productCard(productName).locator(".productinfo p");
   }
 
-  addToCartButton(productName: string) {
+  private addToCartButton(productName: string) {
     return this.productCard(productName)
       .locator(".productinfo")
       .getByText("Add to cart");
   }
-
-  //-----------------------------------------------------
-  // ACTIONS
-  //-----------------------------------------------------
 
   async clickCart(): Promise<void> {
     await expect(this.Cart).toBeVisible();
@@ -77,77 +59,50 @@ export class automationExercisePage {
     expect(emptyText).toBe(emptyMessage);
   }
 
-  async addProductUsingEmptyPageOption(productName: string): Promise<void> {
-    // 1. Click "here"
-    await expect(this.hereLinkProduct).toBeVisible();
-    await this.hereLinkProduct.click();
+  private async navigateToProductPage(fromEmptyPage: boolean): Promise<void> {
+    if (fromEmptyPage) {
+      await expect(this.hereLinkProduct).toBeVisible();
+      await this.hereLinkProduct.click();
+    } else {
+      await expect(this.Products).toBeVisible();
+      await this.Products.click();
+    }
     await expect(this.page).toHaveURL(URLs.productPage);
-
-    // 2. Search typed dynamically
-    await expect(this.productSearchBar).toBeVisible();
-    await this.productSearchBar.click();
-
-    const delay = 5000 / productName.length;
-    await this.page.keyboard.type(productName, { delay });
-
-    await this.productsearchButton.click();
-
-    // 3. Verify card & product name
-    const card = this.productCard(productName);
-    await expect(card).toBeVisible();
-
-    const nameElement = this.productNameElement(productName);
-    await expect(nameElement).toHaveText(productName);
-
-    // 4. Hover to reveal slider
-    await card.hover(); // FIXED: hover card, not name
-
-    // 5. Click Add to cart inside the correct card
-    const addButton = this.addToCartButton(productName);
-    await addButton.click();
-
-    // 6. Continue shopping
-    await expect(this.continueShopping).toBeVisible();
-    await this.continueShopping.click();
-
-    // 7. Go to cart
-    // await this.Cart.click();
   }
-  async addProductUsingProductPageOption(productName: string): Promise<void> {
-    // 1. Click "Product"
-    await expect(this.Products).toBeVisible();
-    await this.Product.click();
-    await expect(this.page).toHaveURL(URLs.productPage);
 
-    // 2. Search typed dynamically
+  private async searchProduct(productName: string): Promise<void> {
     await expect(this.productSearchBar).toBeVisible();
     await this.productSearchBar.click();
     await this.productSearchBar.clear();
-
     const delay = 5000 / productName.length;
     await this.page.keyboard.type(productName, { delay });
-
     await this.productsearchButton.click();
+  }
 
-    // 3. Verify card & product name
+  private async validateProductCard(productName: string): Promise<void> {
     const card = this.productCard(productName);
     await expect(card).toBeVisible();
+    const name = this.productNameElement(productName);
+    await expect(name).toHaveText(productName);
+    await card.hover();
+  }
 
-    const nameElement = this.productNameElement(productName);
-    await expect(nameElement).toHaveText(productName);
-
-    // 4. Hover to reveal slider
-    await card.hover(); // FIXED: hover card, not name
-
-    // 5. Click Add to cart inside the correct card
+  private async addToCart(productName: string): Promise<void> {
     const addButton = this.addToCartButton(productName);
     await addButton.click();
-
-    // 6. Continue shopping
     await expect(this.continueShopping).toBeVisible();
     await this.continueShopping.click();
+  }
 
-    // 7. Go to cart
-    // await this.Cart.click();
+  async addProduct(productName: string, isFirst: boolean): Promise<void> {
+    await this.navigateToProductPage(isFirst);
+    await this.searchProduct(productName);
+    await this.validateProductCard(productName);
+    await this.addToCart(productName);
+  }
+
+  async checkOutProducts(): Promise<void> {
+    await expect(this.checkOutButton).toBeVisible();
+    await this.checkOutButton.click();
   }
 }

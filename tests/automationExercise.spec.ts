@@ -1,11 +1,6 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 import { automationExercisePage } from "../pages/automationExercisePage";
-import {
-  requiredProducts,
-  URLs,
-  emptyMessage,
-} from "../constants/automationExercise";
-// import { beforeEach } from 'node:test';
+import { requiredProducts } from "../constants/automationExercise";
 
 test.describe("MariTime - AutomationExercise", () => {
   let autoEx: automationExercisePage;
@@ -15,13 +10,15 @@ test.describe("MariTime - AutomationExercise", () => {
     await page.goto("https://automationexercise.com/");
   });
 
-  test("Add 3 product and checkout", async ({ page }) => {
+  test("Add 3 products and checkout", async () => {
     await autoEx.clickCart();
     await autoEx.verifyTheCartIsEmpty();
-    await autoEx.addProductUsingEmptyPageOption(requiredProducts[0]);
-    await autoEx.addProductUsingProductPageOption(requiredProducts[1]);
-    // await tl.VerifyVisibilityOfSelenium();
-    // const items = await tl.extractAndPrintItems();
-    // await tl.assertSeleniumItems(items);
+
+    for (const [index, product] of requiredProducts.entries()) {
+      await autoEx.addProduct(product, index === 0);
+    }
+
+    await autoEx.clickCart();
+    await autoEx.checkOutProducts();
   });
 });
