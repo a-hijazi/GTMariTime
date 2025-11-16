@@ -19,6 +19,7 @@ test.describe("MariTime - AutomationExercise", () => {
     await autoEx.clickCart();
     await autoEx.verifyTheCartIsEmpty();
     await autoEx.addProductUsingEmptyPageOption(requiredProducts[0]);
+    await autoEx.addProductUsingProductPageOption(requiredProducts[1]);
     // await tl.VerifyVisibilityOfSelenium();
     // const items = await tl.extractAndPrintItems();
     // await tl.assertSeleniumItems(items);
