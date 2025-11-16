@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { techlistic } from "../pages/techlistic";
 import { beforeEach } from "node:test";
 
-test.describe("MariTime - Techlistic", () => {
+test.describe("GTMariTime - Techlistic", () => {
   let tl: techlistic;
 
   test.beforeEach(async ({ page }) => {

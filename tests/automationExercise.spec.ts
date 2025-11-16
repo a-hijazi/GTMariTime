@@ -2,7 +2,7 @@ import { test } from "@playwright/test";
 import { automationExercisePage } from "../pages/automationExercisePage";
 import { requiredProducts } from "../constants/automationExercise";
 
-test.describe("MariTime - AutomationExercise", () => {
+test.describe("GTMariTime - AutomationExercise", () => {
   let autoEx: automationExercisePage;
 
   test.beforeEach(async ({ page }) => {
