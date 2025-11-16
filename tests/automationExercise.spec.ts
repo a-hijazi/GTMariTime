@@ -1,21 +1,24 @@
-import { test, expect } from '@playwright/test';
-// import { techlistic} from '../pages/techlistic'
-// import { beforeEach } from 'node:test';
+import { test } from "@playwright/test";
+import { automationExercisePage } from "../pages/automationExercisePage";
+import { requiredProducts } from "../constants/automationExercise";
 
-test.describe('MariTime - AutomationExercise', () =>
-  {
-//    let tl: techlistic; 
+test.describe("MariTime - AutomationExercise", () => {
+  let autoEx: automationExercisePage;
 
-//     test.beforeEach(async ({ page }) => {
-//     tl = new techlistic(page);    
-//     await page.goto('https://www.techlistic.com/');
-//   });
-//test
-  test('Extract all Items from Selenium dropdown list', async ({ page }) => {
-   
-    // await tl.VerifyVisibilityOfSelenium();
-    // const items = await tl.extractAndPrintItems(); 
-    // await tl.assertSeleniumItems(items);    
+  test.beforeEach(async ({ page }) => {
+    autoEx = new automationExercisePage(page);
+    await page.goto("https://automationexercise.com/");
+  });
+
+  test("Add 3 products and checkout", async () => {
+    await autoEx.clickCart();
+    await autoEx.verifyTheCartIsEmpty();
+
+    for (const [index, product] of requiredProducts.entries()) {
+      await autoEx.addProduct(product, index === 0);
+    }
+
+    await autoEx.clickCart();
+    await autoEx.checkOutProducts();
+  });
 });
-
-})
