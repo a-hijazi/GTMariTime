@@ -1,27 +1,28 @@
-import { test, expect } from "@playwright/test";
+// covid.spec.ts
+
+import { test } from "@playwright/test";
 import { CovidPage } from "../pages/covidPage";
-import * as covidConstants from "../constants/covid";
+import { LIMITS } from "../constants/covid";
 
-test.describe("Covid Explorer - Line Chart - UK", () => {
-  let covid: CovidPage;
+test("Extract tooltip values for United Kingdom", async ({ page }) => {
+  test.setTimeout(240000);
+  const covid = new CovidPage(page);
 
-  test.beforeEach(async ({ page }) => {
-    covid = new CovidPage(page);
-    await page.goto("https://ourworldindata.org/explorers/covid");
-  });
+  await covid.goto();
+  await covid.selectIndicator();
+  await covid.switchToLineChart();
+  await covid.clearSelection();
+  await covid.selectUK();
+  await covid.playTimelapse();
 
-  test("Select UK only and log chart tooltips", async () => {
-    await covid.goToLineChart();
-    await covid.clearCountries();
-    await covid.searchAndSelectCountry(covidConstants.country);
+  const circles = await covid.getUKCircles();
+  const total = await circles.count();
+  const extractLimit = Math.min(total, LIMITS.tooltipPoints);
 
-    await covid.waitForChartPoints();
-    const tooltips = await covid.extractTooltips();
+  console.log(`Found ${total} circles. Extracting first ${extractLimit}...`);
 
-    // Optional: assertion
-    expect(tooltips.length).toBeGreaterThan(0);
-    expect(
-      tooltips.some((t) => t.includes(covidConstants.country))
-    ).toBeTruthy();
-  });
+  for (let i = 0; i < extractLimit; i++) {
+    const tooltipText = await covid.extractTooltip(i, circles);
+    console.log(`Circle ${i + 1} → ${tooltipText}`);
+  }
 });

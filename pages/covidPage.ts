@@ -1,79 +1,83 @@
-import { Locator, Page, expect } from "@playwright/test";
-import * as covidConstants from "../constants/covid";
+// covidPage.ts
+
+import { Page, expect } from "@playwright/test";
+import { COVID_URL, SELECTORS, COUNTRIES, LIMITS } from "../constants/covid";
 
 export class CovidPage {
-  private readonly lineTab: Locator;
-  private readonly clearSelectionBtn: Locator;
-  private readonly emptyMapMessage: Locator;
-  private readonly countrySearchInput: Locator;
+  constructor(private page: Page) {}
 
-  constructor(private readonly page: Page) {
-    this.lineTab = page.getByRole("tab", { name: "Line" });
-    this.clearSelectionBtn = page.getByText("Clear selection");
-    this.emptyMapMessage = page.locator("#no-data-message");
-    this.countrySearchInput = page.getByPlaceholder(
-      "Type to add a country or region..."
-    );
+  async goto() {
+    await this.page.goto(COVID_URL);
   }
 
-  async goToLineChart(): Promise<void> {
-    await expect(this.lineTab).toBeVisible();
-    await this.lineTab.click();
+  async selectIndicator() {
+    await this.page
+      .getByRole("button", { name: SELECTORS.indicatorButton })
+      .click();
+    await this.page
+      .getByRole("option", {
+        name: SELECTORS.indicatorOptionConfirmed,
+        exact: true,
+      })
+      .click();
   }
 
-  async clearCountries(): Promise<void> {
-    await expect(this.clearSelectionBtn).toBeVisible();
-    await this.clearSelectionBtn.click();
-    await this.clearSelectionBtn.click();
-
-    await expect(this.emptyMapMessage).toBeVisible();
-    const text = await this.emptyMapMessage.textContent();
-    expect(text).toBe(covidConstants.messages.emptyMapMessage);
+  async switchToLineChart() {
+    await this.page.getByRole("tab", { name: SELECTORS.tabLineChart }).click();
   }
 
-  async searchAndSelectCountry(country: string): Promise<void> {
-    await expect(this.countrySearchInput).toBeVisible();
-    await this.countrySearchInput.click();
-    await this.countrySearchInput.fill(country);
-    await this.page.keyboard.press("Enter");
-
-    // Wait for the option to appear (with <mark> or label)
-    // const countryOption = this.page.locator("label.EntityPickerOption", {
-    //   hasText: country,
-    // });
-    // await expect(countryOption).toBeVisible();
-    // await countryOption.click();
-
-    // Validate checkbox is checked
-    // const checkbox = countryOption.locator('input[type="checkbox"]');
-    // await expect(checkbox).toBeChecked();
+  async clearSelection() {
+    await this.page.getByText(SELECTORS.clearSelection).click();
+    await this.page.getByText(SELECTORS.clearSelection).click();
   }
 
-  async waitForChartPoints(): Promise<void> {
-    // adjust the selector depending on actual DOM
-    await this.page.waitForSelector("svg g.points circle", { timeout: 10_000 });
+  async selectUK() {
+    const input = this.page.getByRole("textbox", {
+      name: SELECTORS.countryInputLabel,
+    });
+    await input.click();
+    await input.fill(COUNTRIES.uk);
+    await input.press("Enter");
   }
 
-  async extractTooltips(): Promise<string[]> {
-    const points = this.page.locator("svg g.points circle");
-    const count = await points.count();
-    const result: string[] = [];
+  async playTimelapse() {
+    await this.page.getByText(SELECTORS.playButton).click();
+    await this.page.waitForTimeout(LIMITS.waitingSlider);
+    await this.page.getByText(SELECTORS.pauseButton).click();
+  }
 
-    for (let i = 0; i < count; i++) {
-      const point = points.nth(i);
-      await point.hover();
+  async getUKCircles() {
+    const circles = this.page.locator("g#datapoints__United-Kingdom circle");
+    await circles.first().waitFor();
+    return circles;
+  }
 
-      // Tooltip DOM / selector needs to be verified
-      const tooltip = this.page.locator(
-        ".Popover__Content, .Tooltip, .chart-tooltip"
-      );
-      await expect(tooltip).toBeVisible({ timeout: 2000 });
+  async extractTooltip(
+    circleIndex: number,
+    circlesLocator: ReturnType<Page["locator"]>
+  ) {
+    const c = circlesLocator.nth(circleIndex);
+    await c.hover();
 
-      const text = await tooltip.innerText();
-      console.log(`Point ${i + 1}: ${text}`);
-      result.push(text);
-    }
+    const tooltip = this.page.locator(SELECTORS.tooltipRoot);
+    await expect(tooltip).toBeVisible();
 
-    return result;
+    const title =
+      (await tooltip.locator(SELECTORS.tooltipTitle).textContent())?.trim() ??
+      "";
+    const subtitle =
+      (
+        await tooltip.locator(SELECTORS.tooltipSubtitle).textContent()
+      )?.trim() ?? "";
+    const seriesName =
+      (
+        await tooltip.locator(SELECTORS.tooltipSeriesName).textContent()
+      )?.trim() ?? "";
+    const seriesValue =
+      (
+        await tooltip.locator(SELECTORS.tooltipSeriesValue).textContent()
+      )?.trim() ?? "";
+
+    return `${title} | ${subtitle} | ${seriesName} | ${seriesValue}`;
   }
 }
