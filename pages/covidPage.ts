@@ -1,5 +1,3 @@
-// covidPage.ts
-
 import { Page, expect } from "@playwright/test";
 import { COVID_URL, SELECTORS, COUNTRIES, LIMITS } from "../constants/covid";
 

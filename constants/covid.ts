@@ -1,5 +1,3 @@
-// covidConstants.ts
-
 export const COVID_URL = "https://ourworldindata.org/explorers/covid";
 
 export const SELECTORS = {

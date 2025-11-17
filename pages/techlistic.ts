@@ -6,11 +6,7 @@ export class techlistic {
   private readonly seleniumItemsList: Locator;
 
   constructor(private readonly page: Page) {
-    // this.navBarSelenium = page.locator('.dropdown').locator('.dropbtn', { hasText: 'Selenium' });
-    // this.navBarSelenium = page.locator('li.overflowable-item >> a.dropbtn', { hasText: 'Selenium' }).first();
-
     this.navBarSelenium = page.getByRole("link", { name: "Selenium" }).first();
-    // this.seleniumItemsList = page.locator('.dropdown-content');
     this.seleniumItemsList = page.locator(
       'li.overflowable-item:has(a.dropbtn:text("Selenium")) .dropdown-content a'
     );
@@ -20,7 +16,6 @@ export class techlistic {
     await this.page.waitForLoadState("domcontentloaded");
     await expect(this.navBarSelenium).toBeVisible();
     await this.navBarSelenium.hover();
-    // await this.navBarSelenium.click();
   }
 
   async extractAndPrintItems(): Promise<string[]> {

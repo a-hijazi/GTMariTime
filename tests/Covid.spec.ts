@@ -1,5 +1,3 @@
-// covid.spec.ts
-
 import { test } from "@playwright/test";
 import { CovidPage } from "../pages/covidPage";
 import { LIMITS } from "../constants/covid";
